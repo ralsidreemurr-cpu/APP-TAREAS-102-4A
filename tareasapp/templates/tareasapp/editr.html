@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar tarea</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .contenedor { width: 80%; max-width: 600px; margin: 20px auto; }
+        .tarjeta { background: white; padding: 25px; border-radius: 8px; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input[type=text], textarea { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; }
+        textarea { min-height: 100px; }
+        .boton, button { display: inline-block; padding: 10px 15px; background: #333; color: white; border: none; border-radius: 5px; text-decoration: none; cursor: pointer; margin-top: 15px; margin-right: 8px; font-size: 14px; }
+        nav a { margin-right: 15px; }
+        .mensaje { padding: 12px; border-radius: 5px; margin-top: 15px; display: none; }
+        .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <nav id="nav-sesion"></nav>
+
+    <div class="tarjeta">
+        <h1>Editar tarea</h1>
+
+        <form id="form-tarea">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" maxlength="100" required>
+
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" required></textarea>
+
+            <label>
+                <input type="checkbox" id="completada">
+                Tarea completada
+            </label>
+
+            <button type="submit">Actualizar</button>
+            <a class="boton" href="/">Cancelar</a>
+        </form>
+
+        <div id="mensaje" class="mensaje"></div>
+    </div>
+</div>
+
+<script src="{% static 'tareasapp/js/api.js' %}"></script>
+<script>
+const TAREA_ID = {{ tarea_id }};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!requerirSesion()) return;
+
+    const r = await llamarApi('tareas/' + TAREA_ID + '/');
+    if (!r.ok) {
+        document.getElementById('form-tarea').style.display = 'none';
+        mostrarMensaje(textoError(r.datos), 'error');
+        return;
+    }
+
+    document.getElementById('titulo').value = r.datos.titulo;
+    document.getElementById('descripcion').value = r.datos.descripcion;
+    document.getElementById('completada').checked = r.datos.completada;
+
+    document.getElementById('form-tarea').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const datos = {
+            titulo: document.getElementById('titulo').value.trim(),
+            descripcion: document.getElementById('descripcion').value.trim(),
+            completada: document.getElementById('completada').checked,
+        };
+
+        const r2 = await llamarApi('tareas/' + TAREA_ID + '/', 'PUT', datos);
+
+        if (r2.ok) {
+            window.location.href = '/';
+        } else {
+            mostrarMensaje(textoError(r2.datos), 'error');
+        }
+    });
+});
+</script>
+</body>
+</html>

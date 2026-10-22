@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Editar tarea</title>
+</head>
+
+<body>
+
+    <h1>✏️ Editar tarea</h1>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <label for="titulo">Título:</label>
+        <br>
+
+        <input
+            type="text"
+            id="titulo"
+            name="titulo"
+            value="{{ tarea.titulo }}"
+            required
+        >
+
+        <br><br>
+
+        <label for="descripcion">Descripción:</label>
+        <br>
+
+        <textarea
+            id="descripcion"
+            name="descripcion"
+            required
+        >{{ tarea.descripcion }}</textarea>
+
+        <br><br>
+
+        <label>
+            <input
+                type="checkbox"
+                name="completada"
+                {% if tarea.completada %}checked{% endif %}
+            >
+            Tarea completada
+        </label>
+
+        <br><br>
+
+        <button type="submit">
+            Guardar cambios
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="/">
+        ← Volver al inicio
+    </a>
+
+</body>
+
+</html>

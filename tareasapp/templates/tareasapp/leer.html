@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Leer tarea</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .contenedor { width: 80%; max-width: 600px; margin: 20px auto; }
+        .tarjeta { background: white; padding: 25px; border-radius: 8px; }
+        .boton, button { display: inline-block; padding: 10px 15px; background: #333; color: white; border: none; border-radius: 5px; text-decoration: none; cursor: pointer; margin-top: 15px; margin-right: 8px; font-size: 14px; }
+        nav a { margin-right: 15px; }
+        .mensaje { padding: 12px; border-radius: 5px; margin-top: 15px; display: none; }
+        .mensaje.error { background: #f8d7da; color: #721c24; display: block; }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <nav id="nav-sesion"></nav>
+
+    <div class="tarjeta" id="detalle">
+        <p>Cargando...</p>
+    </div>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <a class="boton" href="/">⬅️ Volver</a>
+</div>
+
+<script src="{% static 'tareasapp/js/api.js' %}"></script>
+<script>
+const TAREA_ID = {{ tarea_id }};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (!requerirSesion()) return;
+
+    const caja = document.getElementById('detalle');
+    const r = await llamarApi('tareas/' + TAREA_ID + '/');
+
+    if (!r.ok) {
+        caja.style.display = 'none';
+        mostrarMensaje(textoError(r.datos), 'error');
+        return;
+    }
+
+    const t = r.datos;
+    caja.innerHTML = '';
+
+    const h1 = document.createElement('h1');
+    h1.textContent = t.titulo;
+
+    const desc = document.createElement('p');
+    desc.textContent = t.descripcion;
+
+    const estado = document.createElement('p');
+    estado.innerHTML = '<strong>Estado:</strong> ' + textoEstado(t.completada);
+
+    const acciones = document.createElement('div');
+    acciones.append(
+        crearEnlace('✏️ Editar', '/tareas/' + TAREA_ID + '/editar/'),
+        crearEnlace('🗑️ Eliminar', '/tareas/' + TAREA_ID + '/eliminar/')
+    );
+
+    caja.append(h1, desc, estado, acciones);
+});
+</script>
+</body>
+</html>
